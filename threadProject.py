@@ -16,6 +16,19 @@ def CutArray(array, cut): # cut the array into pieces
 		index+=partition
 	return arrays
 
+def CutArrayProcess(array, cut): # cut the array into pieces using processs
+	print("Cutting into", cut, "pieces...")
+	index = 0
+	partition = int(len(array)/cut)
+	arrays = []
+	while index < len(array):
+		cutArray = []
+		for i in range(partition):
+			cutArray.append(array[index+i])
+		arrays.append(cutArray)
+		index+=partition
+	return arrays
+
 def BubbleSort(array, tempQueue): # bubble sort
 	arrayLength = len(array)
 	for i in range(arrayLength-1):
@@ -178,15 +191,16 @@ def main():
 
 	elif whichFunctionToUse == 3:
 		tempQueue = multiprocessing.Manager().Queue()
+		cutArrays = multiprocessing.Manager().list()
 		cut = int(input("How many patitions would you like to cut?\n"))
 		startTime = time.time()
 		print("Running function 3...")
-		cutArrays = multiprocessing.Manager().list(CutArray(array, cut))
+		cutArrays = multiprocessing.Manager().list(CutArrayProcess(array, cut))
 		BubbleForProcess(cutArrays, tempQueue)
-		MergeForProcess(cutArrays, tempQueue)
 		for elements in cutArrays:
 			print(elements)
-		
+		MergeForProcess(cutArrays, tempQueue)
+
 	elif whichFunctionToUse == 4:
 		cut = int(input("How many patitions would you like to cut?\n"))
 		startTime = time.time()
