@@ -3,6 +3,7 @@ import threading
 from queue import Queue
 
 def CutArray(array, cut): # cut the array into pieces
+	print("Cutting into", cut, "pieces...")
 	index = 0
 	partition = int(len(array)/cut)
 	arrays = []
@@ -32,55 +33,53 @@ def BubbleForThread(cutArrays, tempQueue):
 		thread.join()
 
 def Merge(cutArrays, tempQueue): # merge the cut arrays
-	layer = len(cutArrays)
+	layer = len(cutArrays)//2
 	while layer >= 1:
-		increaseIndex = 1
+		for _ in range(layer):
+			addArray = cutArrays.pop(0)+cutArrays.pop(0)
+			MergeSort(addArray, tempQueue)
+			cutArrays.append(addArray)
+
+		if len(cutArrays[0])<len(cutArrays[1]):
+			cutArrays.append(cutArrays.pop(0))
 
 		if layer == 1:
 			while len(cutArrays) > 1:
-				print(len(cutArrays))
-				addArray = cutArrays.pop(0)+cutArrays.pop(1)
+				addArray = cutArrays.pop(0)+cutArrays.pop(0)
 				MergeSort(addArray, tempQueue)
 				cutArrays.append(addArray)
-
-		while increaseIndex < layer :
-			addArray = cutArrays.pop(0)+cutArrays.pop(1)
-			MergeSort(addArray, tempQueue)
-			cutArrays.append(addArray)
-			increaseIndex+=2
-
-		if layer % 2 != 0:
-			cutArrays.append(cutArrays.pop(0))
 
 		layer//=2
 
 def MergeForThread(cutArrays, tempQueue): # merge the cut arrays
 	mergeThreads = []
-	layer = len(cutArrays)
+	layer = len(cutArrays)//2
 	while layer >= 1:
-		increaseIndex = 1
+		print(layer)
+
+		for _ in range(layer):
+			addArray = cutArrays.pop(0)+cutArrays.pop(0)
+			mergeThread = threading.Thread(target=MergeSort, args=(addArray, tempQueue))
+			mergeThread.start()
+			mergeThreads.append(mergeThread)
+			cutArrays.append(addArray)
+
+		for thread in mergeThreads: # join threads
+			thread.join()
+
+		if len(cutArrays[0])<len(cutArrays[1]):
+			cutArrays.append(cutArrays.pop(0))
 
 		if layer == 1:
 			while len(cutArrays) > 1:
-				addArray = cutArrays.pop(0)+cutArrays.pop(1)
+				addArray = cutArrays.pop(0)+cutArrays.pop(0)
 				mergeThread = threading.Thread(target=MergeSort, args=(addArray, tempQueue))
 				mergeThread.start()
 				mergeThreads.append(mergeThread)
 				cutArrays.append(addArray)
 
-		while increaseIndex < layer :
-			addArray = cutArrays.pop(0)+cutArrays.pop(1)
-			mergeThread = threading.Thread(target=MergeSort, args=(addArray, tempQueue))
-			mergeThread.start()
-			mergeThreads.append(mergeThread)
-			cutArrays.append(addArray)
-			increaseIndex+=2
-
-		for thread in mergeThreads: # join threads
-			thread.join()
-
-		if layer % 2 != 0:
-			cutArrays.append(cutArrays.pop(0))
+			for thread in mergeThreads:
+				thread.join()
 
 		layer//=2
 
@@ -115,8 +114,8 @@ def MergeSort(array, tempQueue): # merge sort
 			k+=1
 
 def main():
-	fileNumber = input("Please enter the number of data? (1w, 10w, 50w, 100w)\n")
-	fileName = input("Please enter the number of the function? (1, 2, 3, 4)\n")
+	fileNumber = input("How much data would you like to test? (1w, 10w, 50w, 100w)\n")
+	fileName = input("Which function would you like to run? (1, 2, 3, 4)\n")
 	inputFile = open(fileNumber+fileName+".txt", 'r')
 	whichFunctionToUse = int(inputFile.readline())
 	array = []
@@ -138,13 +137,10 @@ def main():
 		cutArrays = CutArray(array, cut)
 		BubbleForThread(cutArrays, tempQueue)
 		MergeForThread(cutArrays, tempQueue)
-		n = 0
-		for arr in cutArrays:
-			n+=1
-			#print(arr)
-		print(n)
-		
 
+		for arr in cutArrays:
+			print(arr)
+		
 	elif whichFunctionToUse == 4:
 		cut = int(input("How many patitions would you like to cut?\n"))
 		startTime = time.time()
@@ -152,11 +148,7 @@ def main():
 		cutArrays = CutArray(array, cut)
 		for arrays in cutArrays: # do bubble sort
 			BubbleSort(arrays, tempQueue)
-
 		Merge(cutArrays, tempQueue) # do merge and sort
-
-		for arr in cutArrays:
-			print(arr)
 
 	inputFile.close()
 	endTime = time.time()
