@@ -1,4 +1,2 @@
-n = 100
-while n > 1:
-    n //= 2
+for n in range(5):
     print(n)
