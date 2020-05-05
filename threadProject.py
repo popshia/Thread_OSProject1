@@ -1,5 +1,6 @@
 import time
 import threading
+import multiprocessing
 from queue import Queue
 
 def CutArray(array, cut): # cut the array into pieces
@@ -22,7 +23,7 @@ def BubbleSort(array, tempQueue): # bubble sort
 			if array[j] > array[j+1]:
 				array[j], array[j+1] = array[j+1], array[j]
 
-def BubbleForThread(cutArrays, tempQueue):
+def BubbleForThread(cutArrays, tempQueue): #bubble sort using threads
 	bubbleThreads = []
 	for singleCutArray in cutArrays: # create bubble sort threads
 		bubbleThread = threading.Thread(target=BubbleSort, args=(singleCutArray, tempQueue))
@@ -31,6 +32,16 @@ def BubbleForThread(cutArrays, tempQueue):
 
 	for thread in bubbleThreads: # join threads
 		thread.join()
+
+def BubbleForProcess(cutArrays, tempQueue): #bubble sort using processs
+	bubbleProcessS = []
+	for singleCutArray in cutArrays: # create bubble sort processs
+		bubbleProcess = multiprocessing.Process(target=BubbleSort, args=(singleCutArray, tempQueue))
+		bubbleProcess.start()
+		bubbleProcessS.append(bubbleProcess)
+
+	for process in bubbleProcessS: # join process
+		process.join()
 
 def Merge(cutArrays, tempQueue): # merge the cut arrays
 	layer = len(cutArrays)//2
@@ -51,12 +62,10 @@ def Merge(cutArrays, tempQueue): # merge the cut arrays
 
 		layer//=2
 
-def MergeForThread(cutArrays, tempQueue): # merge the cut arrays
+def MergeForThread(cutArrays, tempQueue): # merge the cut arrays using threads
 	mergeThreads = []
 	layer = len(cutArrays)//2
 	while layer >= 1:
-		print(layer)
-
 		for _ in range(layer):
 			addArray = cutArrays.pop(0)+cutArrays.pop(0)
 			mergeThread = threading.Thread(target=MergeSort, args=(addArray, tempQueue))
@@ -80,6 +89,36 @@ def MergeForThread(cutArrays, tempQueue): # merge the cut arrays
 
 			for thread in mergeThreads:
 				thread.join()
+
+		layer//=2
+
+def MergeForProcess(cutArrays, tempQueue): # merge the cut arrays using processs
+	mergeProcessS = []
+	layer = len(cutArrays)//2
+	while layer >= 1:
+		for _ in range(layer):
+			addArray = cutArrays.pop(0)+cutArrays.pop(0)
+			mergeProcess = multiprocessing.Process(target=MergeSort, args=(addArray, tempQueue))
+			mergeProcess.start()
+			mergeProcessS.append(mergeProcess)
+			cutArrays.append(addArray)
+
+		for process in mergeProcessS: # join threads
+			process.join()
+
+		if len(cutArrays[0])<len(cutArrays[1]):
+			cutArrays.append(cutArrays.pop(0))
+
+		if layer == 1:
+			while len(cutArrays) > 1:
+				addArray = cutArrays.pop(0)+cutArrays.pop(0)
+				mergeProcess = multiprocessing.Process(target=MergeSort, args=(addArray, tempQueue))
+				mergeProcess.start()
+				mergeProcessS.append(mergeProcess)
+				cutArrays.append(addArray)
+
+			for process in mergeProcessS:
+				process.join()
 
 		layer//=2
 
@@ -128,7 +167,6 @@ def main():
 		startTime = time.time()
 		print("Running function 1...")
 		BubbleSort(array, tempQueue)
-		#print(array)
 
 	elif whichFunctionToUse == 2:
 		cut = int(input("How many patitions would you like to cut?\n"))
@@ -138,8 +176,16 @@ def main():
 		BubbleForThread(cutArrays, tempQueue)
 		MergeForThread(cutArrays, tempQueue)
 
-		for arr in cutArrays:
-			print(arr)
+	elif whichFunctionToUse == 3:
+		tempQueue = multiprocessing.Manager().Queue()
+		cut = int(input("How many patitions would you like to cut?\n"))
+		startTime = time.time()
+		print("Running function 3...")
+		cutArrays = multiprocessing.Manager().list(CutArray(array, cut))
+		BubbleForProcess(cutArrays, tempQueue)
+		MergeForProcess(cutArrays, tempQueue)
+		for elements in cutArrays:
+			print(elements)
 		
 	elif whichFunctionToUse == 4:
 		cut = int(input("How many patitions would you like to cut?\n"))
