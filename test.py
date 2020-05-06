@@ -1,16 +1,26 @@
-from multiprocessing import Process, Manager
+import threading
+import time
 
-def dothing(L, i):  # the managed list `L` passed explicitly.
-    L.append("anything")
+from queue import Queue
 
-if __name__ == "__main__":
-    with Manager() as manager:
-        L = manager.list()  # <-- can be shared between processes.
-        processes = []
-        for i in range(5):
-            p = Process(target=dothing, args=(L,i))  # Passing the list
-            p.start()
-            processes.append(p)
-        for p in processes:
-            p.join()
-        print(L)
+def job(l,q):
+    for i in range (len(l)):
+        l[i] = l[i]**2
+    q.put(l)
+
+def multithreading():
+    q =Queue()
+    threads = []
+    data = [[1,2,3],[3,4,5],[4,4,4],[5,5,5]]
+    for i in range(4):
+        t = threading.Thread(target=job,args=(data[i],q))
+        t.start()
+        threads.append(t)
+    for thread in threads:
+        thread.join()
+    results = []
+    for _ in range(4):
+        results.append(q.get())
+    print(results)
+
+multithreading()
