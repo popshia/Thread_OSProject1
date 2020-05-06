@@ -138,6 +138,14 @@ def Merge(cutArray, tempQueue):
 	tempQueue.put(mergeArray)
 	return mergeArray
 
+def OutputFile(array, fileNumber, fileName, startTime, endTime):
+	output = open(fileNumber+fileName+"_output.txt", 'w')
+	output.write(str(array))
+	output.write("\nCPU process time: ")
+	output.write(str(endTime-startTime))
+	output.write(" sec")
+	output.close()
+
 def main():
 	fileNumber = input("How much data would you like to test? (1w, 10w, 50w, 100w)\n")
 	fileName = input("Which function would you like to run? (1, 2, 3, 4)\n")
@@ -153,6 +161,8 @@ def main():
 		startTime = time.time()
 		print("Running function 1...")
 		BubbleSort(array, tempQueue)
+		endTime = time.time()
+		OutputFile(array, fileNumber, fileName, startTime, endTime)
 
 	elif whichFunctionToUse == 2:
 		cut = int(input("How many patitions would you like to cut?\n"))
@@ -161,6 +171,8 @@ def main():
 		cutArrays = CutArray(array, cut)
 		BubbleForThread(cutArrays, tempQueue)
 		MergeForThread(cutArrays, tempQueue)
+		endTime = time.time()
+		OutputFile(cutArrays, fileNumber, fileName, startTime, endTime)
 
 	elif whichFunctionToUse == 3:
 		with multiprocessing.Manager() as Manager:
@@ -171,6 +183,8 @@ def main():
 			cutArrays = CutArrayProcess(array, cut)
 			BubbleForProcess(cutArrays, tempQueue)
 			MergeForProcess(cutArrays, tempQueue)
+			endTime = time.time()
+			OutputFile(cutArrays, fileNumber, fileName, startTime, endTime)
 
 	elif whichFunctionToUse == 4:
 		cut = int(input("How many patitions would you like to cut?\n"))
@@ -181,12 +195,11 @@ def main():
 			BubbleSort(arrays, tempQueue)
 		for _ in range(len(cutArrays)-1):
 			cutArrays.append(Merge(cutArrays, tempQueue))
-		for a in cutArrays:
-			print(a)
+		endTime = time.time()
+		OutputFile(cutArrays, fileNumber, fileName, startTime, endTime)
 
+	print("CPU process time:", endTime-startTime, "sec")
 	inputFile.close()
-	endTime = time.time()
-	print("CPU process time: ", endTime-startTime, " sec")
 
 if __name__ == "__main__":
 	main()
