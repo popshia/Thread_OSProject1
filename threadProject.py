@@ -35,7 +35,7 @@ def BubbleSort(array, tempQueue): # bubble sort
 				array[j], array[j+1] = array[j+1], array[j]
 	tempQueue.put(array)
 
-def BubbleForThread(cutArrays, tempQueue): #bubble sort using threads
+def BubbleForThread(cutArrays, tempQueue): # bubble sort using threads
 	bubbleThreads = []
 	for singleCutArray in cutArrays: # create bubble sort threads
 		bubbleThread = threading.Thread(target=BubbleSort, args=(singleCutArray, tempQueue))
@@ -45,7 +45,7 @@ def BubbleForThread(cutArrays, tempQueue): #bubble sort using threads
 	for thread in bubbleThreads: # join threads
 		thread.join()
 
-def BubbleForProcess(cutArrays, tempQueue): #bubble sort using processs
+def BubbleForProcess(cutArrays, tempQueue): # bubble sort using processs
 	bubbleProcessS = []
 	for i in range(len(cutArrays)): # create bubble sort processs
 		bubbleProcess = multiprocessing.Process(target=BubbleSort, args=(cutArrays[i], tempQueue))
@@ -85,7 +85,7 @@ def MergeForProcess(cutArrays, tempQueue): # merge the cut arrays using processs
 		MergeSortForProcess(cutArrays, tempQueue)
 		cutArrays.append(tempQueue.get())
 
-def MergeSortForThread(cutArray, tempQueue):
+def MergeSortForThread(cutArray, tempQueue): # merge sort the cut arrays using thread
 	leftArray = cutArray.pop(0)
 	rightArray = cutArray.pop(0)
 	mergeArray = []
@@ -104,7 +104,7 @@ def MergeSortForThread(cutArray, tempQueue):
 
 	cutArray.append(mergeArray)
 
-def MergeSortForProcess(cutArray, tempQueue):
+def MergeSortForProcess(cutArray, tempQueue): # merge sort the cut arrays using process
 	leftArray = cutArray.pop(0)
 	rightArray = cutArray.pop(0)
 	mergeArray = []
@@ -123,7 +123,7 @@ def MergeSortForProcess(cutArray, tempQueue):
 
 	tempQueue.put(mergeArray)
 
-def Merge(cutArray, tempQueue):
+def Merge(cutArray, tempQueue): # compare & merge two arrays
 	leftArray = cutArray.pop(0)
 	rightArray = cutArray.pop(0)
 	mergeArray = []
@@ -143,7 +143,7 @@ def Merge(cutArray, tempQueue):
 	tempQueue.put(mergeArray)
 	return mergeArray
 
-def OutputFile(array, fileNumber, fileName, startTime, endTime):
+def OutputFile(array, fileNumber, fileName, startTime, endTime): # output to file
 	output = open(fileNumber+fileName+"_output.txt", 'w')
 	output.write(str(array))
 	output.write("\nCPU process time: ")
