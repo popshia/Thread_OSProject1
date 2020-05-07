@@ -4,7 +4,6 @@ import multiprocessing
 import queue
 
 def CutArray(array, cut): # cut the array into pieces
-	print("Cutting into", cut, "pieces...")
 	index = 0
 	partition = int(len(array)/cut)
 	arrays = []
@@ -17,7 +16,6 @@ def CutArray(array, cut): # cut the array into pieces
 	return arrays
 
 def CutArrayProcess(array, cut): # cut the array into pieces using processs
-	print("Cutting into", cut, "pieces...")
 	index = 0
 	partition = int(len(array)/cut)
 	arrays = multiprocessing.Manager().list()
@@ -68,6 +66,9 @@ def MergeForThread(cutArrays, tempQueue): # merge the cut arrays using threads
 	for thread in mergeThreads:
 		thread.join()
 
+	while len(cutArrays)>1:
+		MergeSortForThread(cutArrays, tempQueue)
+
 def MergeForProcess(cutArrays, tempQueue): # merge the cut arrays using processs
 	mergeProcessS = []
 
@@ -79,6 +80,10 @@ def MergeForProcess(cutArrays, tempQueue): # merge the cut arrays using processs
 
 	for process in mergeProcessS: # join threads
 		process.join()
+
+	while len(cutArrays)>1:
+		MergeSortForProcess(cutArrays, tempQueue)
+		cutArrays.append(tempQueue.get())
 
 def MergeSortForThread(cutArray, tempQueue):
 	leftArray = cutArray.pop(0)
